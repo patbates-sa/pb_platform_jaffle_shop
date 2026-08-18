@@ -1,13 +1,19 @@
 -- =========================================================================
--- Proves the stored procedure and the dbt model produce identical output.
+-- Validation harness: proves a dbt fct_orders model produces output identical
+-- to the stored procedure it was converted from.
 --
--- Run order:
---   1. dbt build --target dev                              (builds the model)
---   2. call pb_analytics.util.build_fct_orders('SPROC_OUT') (builds the proc's table)
---   3. snow sql -f setup/04_compare_fct_orders.sql
+-- There is intentionally NO fct_orders model in this repo. The procedure in
+-- 03_fct_orders_proc.sql is the input to a conversion exercise — the model is
+-- meant to be generated (by dbt Wizard, or by hand). Shipping a finished model
+-- alongside the procedure would let an agent copy the answer instead of doing
+-- the conversion.
 --
--- The procedure writes to its own schema here so it doesn't overwrite the
--- table dbt just built — otherwise there'd be nothing left to compare.
+-- Run order, once a fct_orders model exists:
+--   1. dbt build --select fct_orders --target dev
+--   2. snow sql -f setup/04_compare_fct_orders.sql
+--
+-- The procedure writes to its own SPROC_OUT schema so it never overwrites the
+-- table dbt built — otherwise there'd be nothing left to compare.
 -- =========================================================================
 
 create schema if not exists pb_analytics.sproc_out
