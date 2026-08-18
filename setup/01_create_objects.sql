@@ -21,7 +21,16 @@ create schema if not exists pb_analytics.dbt_core_pbates
     comment = 'Personal development schema for pat.bates.';
 
 create schema if not exists pb_analytics.dbt_core_prod
-    comment = 'Production schema, built by scheduled dbt runs only.';
+    comment = 'Production schema, built by local dbt Core runs (--target prod).';
+
+-- Schemas for the dbt platform migration. Kept separate from the dbt_core_*
+-- schemas so platform runs and local Core runs never overwrite each other and
+-- the two can be compared side by side. See MIGRATION.md.
+create schema if not exists pb_analytics.dbt_platform_prod
+    comment = 'Production schema, built by dbt platform deploy jobs.';
+
+create schema if not exists pb_analytics.dbt_platform_pbates
+    comment = 'Personal development schema for pat.bates in the dbt platform.';
 
 -- ---------------------------------------------------------------------------
 -- Raw tables

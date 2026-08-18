@@ -28,3 +28,61 @@ models:
         description: Sum of all payments across the customer's orders, in dollars.
         data_tests:
           - not_null
+
+  - name: fct_orders
+    description: >
+      Order fact table. One record per order, with payments pivoted out by
+      payment method. Orders with no payment record are retained with zeroed
+      amounts.
+    columns:
+      - name: order_id
+        description: Primary key for orders.
+        data_tests:
+          - unique
+          - not_null
+      - name: customer_id
+        description: Foreign key to dim_customers.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_customers')
+                field: customer_id
+      - name: order_date
+        description: Date the order was placed.
+        data_tests:
+          - not_null
+      - name: status
+        description: Current fulfillment status of the order.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - placed
+                  - shipped
+                  - completed
+                  - return_pending
+                  - returned
+      - name: credit_card_amount
+        description: Amount of the order paid by credit card, in dollars. Zero if none.
+        data_tests:
+          - not_null
+      - name: coupon_amount
+        description: Amount of the order paid by coupon, in dollars. Zero if none.
+        data_tests:
+          - not_null
+      - name: bank_transfer_amount
+        description: Amount of the order paid by bank transfer, in dollars. Zero if none.
+        data_tests:
+          - not_null
+      - name: gift_card_amount
+        description: Amount of the order paid by gift card, in dollars. Zero if none.
+        data_tests:
+          - not_null
+      - name: amount
+        description: >
+          Total amount paid for the order, in dollars. Equals the sum of the four
+          payment-method columns.
+        data_tests:
+          - not_null
