@@ -1,0 +1,30 @@
+version: 2
+
+models:
+  - name: dim_customers
+    description: >
+      Customer dimension. One record per customer, enriched with order history
+      and lifetime value. Customers with no orders are retained, with zeroed
+      counts and null order dates.
+    columns:
+      - name: customer_id
+        description: Primary key for customers.
+        data_tests:
+          - unique
+          - not_null
+      - name: first_name
+        description: Customer's first name.
+      - name: last_name
+        description: Customer's last initial.
+      - name: first_order_date
+        description: Date of the customer's first order. Null if they have never ordered.
+      - name: most_recent_order_date
+        description: Date of the customer's most recent order. Null if they have never ordered.
+      - name: number_of_orders
+        description: Count of orders placed by the customer. Zero if they have never ordered.
+        data_tests:
+          - not_null
+      - name: lifetime_value
+        description: Sum of all payments across the customer's orders, in dollars.
+        data_tests:
+          - not_null

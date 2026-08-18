@@ -1,0 +1,44 @@
+# Copy this to ~/.dbt/profiles.yml (or set DBT_PROFILES_DIR to point here).
+# Do NOT commit a filled-in copy — profiles.yml is in .gitignore.
+#
+#   database/schema here is where dbt WRITES.
+#   Raw data is read from pb_raw, which is set per-source in
+#   models/staging/*/_*__sources.yml — not here.
+
+pb_core_jaffle_shop:
+  target: dev          # never leave this as prod
+  outputs:
+
+    dev:
+      type: snowflake
+      account: "{{ env_var('DBT_SNOWFLAKE_ACCOUNT') }}"   # e.g. abc12345.us-east-1
+      user: "{{ env_var('DBT_SNOWFLAKE_USER') }}"
+      authenticator: externalbrowser      # browser SSO; no stored secret
+
+      role: "{{ env_var('DBT_SNOWFLAKE_ROLE', 'TRANSFORMER') }}"
+      warehouse: "{{ env_var('DBT_SNOWFLAKE_WAREHOUSE', 'TRANSFORMING') }}"
+      database: pb_analytics
+      schema: dbt_core_pbates
+      threads: 8
+
+    prod:
+      type: snowflake
+      account: "{{ env_var('DBT_SNOWFLAKE_ACCOUNT') }}"
+      user: "{{ env_var('DBT_SNOWFLAKE_USER') }}"
+
+      # Service-account auth for scheduled runs. Key pair is preferred over a
+      # password; browser SSO can't work unattended.
+      private_key_path: "{{ env_var('DBT_SNOWFLAKE_PRIVATE_KEY_PATH', '') }}"
+      private_key_passphrase: "{{ env_var('DBT_ENV_SECRET_SNOWFLAKE_PASSPHRASE', '') }}"
+
+      role: "{{ env_var('DBT_SNOWFLAKE_ROLE', 'TRANSFORMER') }}"
+      warehouse: "{{ env_var('DBT_SNOWFLAKE_WAREHOUSE', 'TRANSFORMING') }}"
+      database: pb_analytics
+      schema: dbt_core_prod
+      threads: 12
+
+# Minimum privileges the role needs:
+#   usage on database pb_raw + its schemas
+#   select on all tables in pb_raw.jaffle_shop and pb_raw.stripe
+#   usage + create table/view on pb_analytics.dbt_core_pbates (and _prod)
+#   usage on the warehouse

@@ -1,0 +1,66 @@
+version: 2
+
+sources:
+  - name: jaffle_shop
+    description: >
+      Replica of the Postgres database backing the Jaffle Shop application.
+      Landed into Snowflake by the EL pipeline.
+    database: pb_raw
+    schema: jaffle_shop
+
+    config:
+      loaded_at_field: _etl_loaded_at
+      freshness:
+        warn_after: {count: 12, period: hour}
+        error_after: {count: 24, period: hour}
+
+    tables:
+      - name: customers
+        description: One record per customer who has registered with the shop.
+        columns:
+          - name: id
+            description: Primary key of the customers table.
+            data_tests:
+              - unique
+              - not_null
+          - name: first_name
+            description: Customer's given name.
+          - name: last_name
+            description: Customer's last initial.
+
+      - name: orders
+        description: >
+          One record per order. Includes orders in every fulfillment state,
+          including returned and cancelled orders.
+        columns:
+          - name: id
+            description: Primary key of the orders table.
+            data_tests:
+              - unique
+              - not_null
+          - name: user_id
+            description: Foreign key to jaffle_shop.customers.id.
+            data_tests:
+              - not_null
+              - relationships:
+                  arguments:
+                    to: source('jaffle_shop', 'customers')
+                    field: id
+          - name: order_date
+            description: Date the order was placed.
+            data_tests:
+              - not_null
+          - name: status
+            description: >
+              Current fulfillment status. Note that this changes over time, so
+              this table is not a reliable record of historical status.
+            data_tests:
+              - not_null
+              - accepted_values:
+                  arguments:
+                    values:
+                      - placed
+                      - shipped
+                      - completed
+                      - return_pending
+                      - returned

@@ -1,0 +1,27 @@
+name: 'pb_core_jaffle_shop'
+version: '1.0.0'
+config-version: 2
+
+# The profile in ~/.dbt/profiles.yml that this project uses to connect.
+profile: 'pb_core_jaffle_shop'
+
+model-paths: ["models"]
+macro-paths: ["macros"]
+test-paths: ["tests"]
+snapshot-paths: ["snapshots"]
+analysis-paths: ["analyses"]
+
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+# Raw data lives in pb_raw and is declared in models/staging/*/_*__sources.yml.
+# Models build into the target schema configured in profiles.yml:
+#   dev  -> pb_analytics.dbt_core_pbates
+#   prod -> pb_analytics.dbt_core_prod
+models:
+  pb_core_jaffle_shop:
+    staging:
+      +materialized: view
+    marts:
+      +materialized: table

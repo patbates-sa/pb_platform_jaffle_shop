@@ -1,0 +1,36 @@
+version: 2
+
+models:
+  - name: stg_stripe__payments
+    description: >
+      One record per payment, with amounts converted from cents to dollars.
+      Note this is a finer grain than orders — an order may have several payments.
+    columns:
+      - name: payment_id
+        description: Primary key for payments.
+        data_tests:
+          - unique
+          - not_null
+      - name: order_id
+        description: Foreign key to stg_jaffle_shop__orders.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_jaffle_shop__orders')
+                field: order_id
+      - name: payment_method
+        description: Method used to make the payment.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - credit_card
+                  - coupon
+                  - bank_transfer
+                  - gift_card
+      - name: amount
+        description: Payment amount in dollars, converted from cents in the source.
+        data_tests:
+          - not_null
